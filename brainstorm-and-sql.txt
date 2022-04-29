@@ -1,0 +1,101 @@
+
+Features:
+- users can sign into the app with their email and password
+- users can create recipes with ingredients and instructions
+- recipes can be marked as public or private
+- users can view other people’s recipes
+- ingredients from recipes can be added to user’s grocery lists
+- users can create their own occasions and assign recipes to occasions
+
+Brainstorm:
+
+Info we need to track:
+- User id
+- Username
+- User email
+- User password
+- Recipe Names
+- Recipe Ingredients
+- Recipe Instruction
+- Recipe public/private
+- Occassions
+- "Likes"
+
+The onboarding screen allows a user to sign in with their email & password. From there, they can see new recipes from other users, visit their own profile (which shows their recipes & occassions), visit other users' profiles (showing that user's recipes & occassions), or search for specific occassions, recipes, or ingredients (the search function will then show occassions and recipes that use the search terms, ranked by "Likes").
+
+Table Ideas:
+
+Users - holds username, email, password, and user id. Each row is an individual user.
+Recipes - holds recipe id, user id, "likes", recipe name, occassion, recipe ingredients, recipe instructions, and public/private setting. Each row is an individual recipe.
+Occassions - holds occassions, occassion id, and assigned recipes. Each row is an individual occassion.
+Grocery Lists - holds user id and ingredients. Each row is an individual user's list.
+
+Relationships:
+
+1 - 1:
+Users table & Grocery Lists table, because each User has exactly one Grocery List.
+
+1 - M:
+Users table & Recipes table, because one User can have many Recipes but each Recipe is made by only one User.
+
+M - M:
+
+Columns:
+
+Users:
+user_id (Integer, Primary Key, Auto Increment, for system to track users), username (VarChar, for users to identify other users), email (VarChar, for system to track email & use with login), password (VarChar, for system to keep of password & use with login).
+
+Recipes:
+recipe_id (Integer, Primary Key, Auto Increment, for system to track recipes), recipe_name (VarChar, for users to identify & search for recipes), user_id (Integer, Foreign Key [Users, user_id], for system to track which user created the recipe), ingredients (Text, for users to identify what ingredients are necessary for the recipe), instructions (Text, for users to know what steps to take to complete a recipe), occasion_id (Integer, Null Possible, Foreign Key [Occasions, occasion_id], for system to track what Occasion the recipe is assigned to, if any), likes (Integer, for users to identify how popular the recipe is & for system to sort recipes when searched).
+
+Occasions:
+occasion_id (Integer, Primary Key, Auto Increment, for system to track occasions), occasion_name (VarChar, for users to identify occasions), recipe_ids (Text, for system to identify what recipes are assaigned to which occasions & for users to see the same).
+
+Grocery Lists:
+user_id (Integer, Foreign Key [Users, user_id], for system to keep each user's grocery list separate), ingredients (Text, for users to know what ingredients they have saved).
+
+SQL:
+
+CREATE TABLE users (
+  user_id SERIAL PRIMARY KEY,
+  username VARCHAR(80),
+  email VARCHAR(120),
+  password VARCHAR(60)
+  );
+
+CREATE TABLE occasions (
+  occasion_id SERIAL PRIMARY KEY,
+  occasion_name VARCHAR(80),
+  recipe_ids TEXT NULL
+  );
+
+CREATE TABLE recipes (
+  recipe_id SERIAL PRIMARY KEY,
+  recipe_name VARCHAR(80),
+  user_id INTEGER NOT NULL REFERENCES users(user_id),
+  ingredients TEXT NULL,
+  instructions TEXT,
+  occassion_id INTEGER NULL REFERENCES occasions(occasion_id),
+  likes INTEGER
+  );
+
+CREATE TABLE grocery_lists (
+  user_id INTEGER NOT NULL REFERENCES users(user_id),
+  ingredients TEXT NULL
+  );
+
+
+INSERT INTO users (username, email, password)
+VALUES
+('SashaB', 'sbarnes@yahoo.mail', 'k1ttyluv4h'),
+('Greggy', 'greg.h.layne@aol.net', '1q2w3e4r5t'),
+('JudyBee', 'judysbeehive@mymail.org', 'h0n3yc0mb');
+
+INSERT INTO occasions (occasion_name)
+VALUES
+('Weddings'),
+('Funerals');
+
+INSERT INTO recipes (recipe_name, likes, instructions, user_id)
+VALUES
+('Garlic Bread', 0, 'Preheat oven to 350 fh...',(SELECT user_id FROM users WHERE username = 'Greggy'))
